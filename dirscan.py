@@ -173,7 +173,7 @@ class DirScan:
                         print "[*] %s =======> 200\n" %domain,
                 self.lock.release()
             except Exception,e:
-                pass
+                print e
 
     def progress(self):
         """show progress"""
@@ -189,12 +189,15 @@ class DirScan:
         self.start_time = time.time()
         t_sequ = []
         t_pro = threading.Thread(target=self.progress, name="progress")
+        t_pro.setDaemon(True)
         t_pro.start()
 
         for i in range(self.threads_num):
             t = threading.Thread(target=self._scan, name=str(i))
             t_sequ.append(t)
             t.start()
+        while self.thread_count > 0:
+            time.sleep(0.01)
 
         for t in t_sequ:
             t.join()
@@ -213,7 +216,7 @@ if __name__ == '__main__':
     parser = optparse.OptionParser('usage: %prog [options] http://www.c-chicken.cc')
     parser.add_option('-t', '--threads', dest='threads_num',
               default=10, type='int',
-              help='Number of threads. default = 10')
+              help='Number of threads. default = 5')
     parser.add_option('-e', '--ext', dest='ext', default='php',
                type='string', help='You want to Scan WebScript. default is php')
    # parser.add_option('-o', '--output', dest='output', default=None,
